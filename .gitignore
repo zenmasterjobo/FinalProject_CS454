@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# emacs trash
+*~
+
+#DS_Store
+.DS_Store
