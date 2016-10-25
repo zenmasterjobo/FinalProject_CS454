@@ -4,9 +4,18 @@ import cv2.cv as cv
 import numpy as np
 import math
 
+# you can use this like s = State(label, coord, etc) 
+class State:
+    def __init__(self, label, coord, outbound0, outbound1):
+        self.label = label
+        self.coord = coord
+        self.outbound0 = outbound0
+        self.outbound1 = outbound1
+
 #each element contains x,y,radius
 circleCoordVect = []
 circleOCRBoundingBox = []
+States = []
 
 def findCircles(img, cimg):
     circles = cv2.HoughCircles(img,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -48,6 +57,18 @@ def findStateLabels(cimg):
         #take what ocr returns and relate those coordinates to the
         #circle coord vector so the circle get an integer label
 
+def findTriangle(cimg):
+    img = cv2.imread('Test1.png')
+    gray = cv2.imread('Test1.png',0)
+    
+    ret,thresh = cv2.threshold(gray,127,255,1)
+    contours,h = cv2.findContours(thresh,1,2)
+
+    for cnt in contours:
+        approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
+        if len(approx)==3:
+            print "triangle"
+            cv2.drawContours(cimg,[cnt],0,(0,255,0),-1)
         
 def main():
     img = cv2.imread('Test1.png',0)
@@ -56,7 +77,8 @@ def main():
 
     findCircles(img, cimg)
     findStateLabels(cimg)
-            
+    findTriangle(cimg)
+    
     cv2.imwrite('output.png',cimg)
     cv2.destroyAllWindows()
     
