@@ -4,6 +4,7 @@ import cv2.cv as cv
 import numpy as np
 import math
 
+
 # you can use this like s = State(label, coord, etc) 
 class State:
     def __init__(self, label, coord_x, coord_y, initial, final, radius):
@@ -33,9 +34,11 @@ def findCircles(img, cimg):
         state = State(None, i[0], i[1], False, False, i[2]);
         States.append(state)
         squarePair.append(i[2]*math.sqrt(2))
+        #print "SQUARE PAIR: ", squarePair
         circleOCRBoundingBox.append(squarePair)
-        
-#def ocr(originaImage,x1,y1,x2,y2)
+        print "BOUNDING BOX: ", circleOCRBoundingBox
+
+        #def ocr(originaImage,x1,y1,x2,y2)
 # somehow do OCR on the bounding box and return that integer found
         
 def findStateLabels(cimg):
@@ -43,7 +46,7 @@ def findStateLabels(cimg):
         point1 = []
         point2 = []
         
-        x1 = math.floor(i[0]-(i[2]/2))
+        x1 = math.floor(i[0])
         y1 = math.floor(i[1]-(i[2]/2))
         x2 = math.floor(i[0]+(i[2]/2))
         y2 = math.floor(i[1]+(i[2]/2))
@@ -64,7 +67,7 @@ def findTriangle(cimg):
     
     ret,thresh = cv2.threshold(gray,127,255,1)
     contours,h = cv2.findContours(thresh,1,2)
-    comparisonStates = []
+   
     
     for cnt in contours:
         approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
@@ -76,7 +79,11 @@ def findTriangle(cimg):
             #print "Ret : ", ret
             triangleTipY = approx[1][0][1]
             triangleTipX = approx[1][0][0]
-    
+            return triangleTipY, triangleTipX
+            
+def findStart(cimg):
+    triangleTipY, triangleTipX = findTriangle(cimg)
+    comparisonStates = []
     for state in States:
         print " Y COORD: ", state.coord_y, "X COORD: ", state.coord_x, "and THE JUST THE TIP Y + 2: ", triangleTipY
         if(state.coord_y <=  triangleTipY + 2 and state.coord_y >= triangleTipY - 2):
@@ -97,8 +104,7 @@ def findTriangle(cimg):
             cv2.circle(cimg,(state.coord_x,state.coord_y),state.radius,(255,0,0),2)
     for i in States:
         print i.coord_x, i.coord_y, i.initial
-
-        
+    
     
 def main():
     img = cv2.imread(filename,0)
@@ -107,7 +113,7 @@ def main():
 
     findCircles(img, cimg)
     findStateLabels(cimg)
-    findTriangle(cimg)
+    findStart(cimg)
     
     cv2.imwrite('output.png',cimg)
     cv2.destroyAllWindows()
