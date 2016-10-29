@@ -4,6 +4,7 @@ import cv2.cv as cv
 import numpy as np
 import math
 import pytesseract
+from PIL import Image
 
 # you can use this like s = State(label, coord, etc) 
 class State:
@@ -67,7 +68,14 @@ def findStateLabels(cimg):
         roi = gray[y1:y2, x1:x2]
         cv2.imwrite(str(idx) + '.png', roi)
         #roi is region of interest.
-        
+        # it is a matrix of pixels i think
+
+
+    image = Image.open('1.png')
+    
+    print pytesseract.image_to_string(image)
+    
+    
 def findTriangle(cimg):
     img = cv2.imread(filename)
     gray = cv2.imread(filename,0)
