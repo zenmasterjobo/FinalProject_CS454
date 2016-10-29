@@ -3,7 +3,7 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 import math
-
+import pytesseract
 
 # you can use this like s = State(label, coord, etc) 
 class State:
@@ -42,7 +42,12 @@ def findCircles(img, cimg):
 # somehow do OCR on the bounding box and return that integer found
         
 def findStateLabels(cimg):
+    img = cv2.imread(filename)
+    gray = cv2.imread(filename,0)
+
+    idx = 0
     for i in circleOCRBoundingBox:
+        idx += 1
         point1 = []
         point2 = []
         
@@ -55,12 +60,14 @@ def findStateLabels(cimg):
         
         point2.append(x2)
         point2.append(y2)
-               
-        cv2.rectangle(cimg,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
-        #ocr (some black and white image, x1,y1,x2,y2)
-        #take what ocr returns and relate those coordinates to the
-        #circle coord vector so the circle get an integer label
 
+        #cv2.rectangle(cimg,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
+        #uncomment to draw rectangle
+        
+        roi = gray[y1:y2, x1:x2]
+        cv2.imwrite(str(idx) + '.png', roi)
+        #roi is region of interest.
+        
 def findTriangle(cimg):
     img = cv2.imread(filename)
     gray = cv2.imread(filename,0)
