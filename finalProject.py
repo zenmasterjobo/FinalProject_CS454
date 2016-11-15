@@ -3,7 +3,8 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 import math
-import pytesseract
+from pytesseract import *
+from PIL import Image
 
 # you can use this like s = State(label, coord, etc) 
 class State:
@@ -34,7 +35,7 @@ def findCircles(img, cimg):
         state = State(None, i[0], i[1], False, False, i[2]);
         States.append(state)
         squarePair.append(i[2]*math.sqrt(2))
-        #print "SQUARE PAIR: ", squarePair
+        print "SQUARE PAIR: ", squarePair
         circleOCRBoundingBox.append(squarePair)
         print "BOUNDING BOX: ", circleOCRBoundingBox
 
@@ -61,13 +62,21 @@ def findStateLabels(cimg):
         point2.append(x2)
         point2.append(y2)
 
-        #cv2.rectangle(cimg,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
+        cv2.rectangle(cimg,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
         #uncomment to draw rectangle
         
         roi = gray[y1:y2, x1:x2]
         cv2.imwrite(str(idx) + '.png', roi)
         #roi is region of interest.
-        
+        # it is a matrix of pixels i think
+
+    image_file = "1.png"
+    im = Image.open(image_file)
+    text = image_to_string(im)
+    print "=====output=======\n"
+    print text
+    
+    
 def findTriangle(cimg):
     img = cv2.imread(filename)
     gray = cv2.imread(filename,0)
