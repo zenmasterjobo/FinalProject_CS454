@@ -3,8 +3,9 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 import math
-from pytesseract import *
+import pytesser as pt
 from PIL import Image
+from PIL import ImageFilter
 
 # you can use this like s = State(label, coord, etc) 
 class State:
@@ -21,7 +22,7 @@ class State:
 #each element contains x,y,radius
 circleOCRBoundingBox = []
 States = []
-filename = raw_input("Please state the file you want to use: ")
+#filename = raw_input("Please state the file you want to use: ")
 
 def findCircles(img, cimg):
     circles = cv2.HoughCircles(img,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -67,15 +68,21 @@ def findStateLabels(cimg):
         
         roi = gray[y1:y2, x1:x2]
         cv2.imwrite(str(idx) + '.png', roi)
+        thresher= cv2.imread("1.png")
+        ret,thresh1 = cv2.threshold(thresher,128,255,cv2.THRESH_BINARY)
+        cv2.imwrite( '1.png', thresh1)
         #roi is region of interest.
         # it is a matrix of pixels i think
 
     image_file = "1.png"
     im = Image.open(image_file)
-    text = image_to_string(im)
-    print "=====output=======\n"
-    print text
-    
+    im.filter(ImageFilter.SHARPEN)
+    #print ("here is the supposed image")
+    #print im
+    i = pt.image_to_string(im)
+    print "=====Label======="
+    print repr(i)
+    print "=====Label=======\n"
     
 def findTriangle(cimg):
     img = cv2.imread(filename)
@@ -84,7 +91,6 @@ def findTriangle(cimg):
     ret,thresh = cv2.threshold(gray,127,255,1)
     contours,h = cv2.findContours(thresh,1,2)
    
-    
     for cnt in contours:
         approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
         if len(approx)==3:
@@ -120,17 +126,32 @@ def findStart(cimg):
             cv2.circle(cimg,(state.coord_x,state.coord_y),state.radius,(255,0,0),2)
     for i in States:
         print i.coord_x, i.coord_y, i.initial
+
+def findLines(cimg):
     
+    edges = cv2.Canny(cimg,50,150,apertureSize = 3)
+    lines = cv2.HoughLinesP(edges,1,np.pi/2,100, minLineLength = 50)[0]
+    for x1,y1,x2,y2 in lines:
+        cv2.line(cimg,(x1,y1),(x2,y2),(0,255,0),1)
+    
+    
+    cv2.imwrite('houglinesresult.jpg',cimg)
+
+    cv2.imwrite("cannylines.png",edges)
     
 def main():
-    img = cv2.imread(filename,0)
-    img = cv2.medianBlur(img,5)
+    img = cv2.imread("Test1.png",0)
+    #img = cv2.imread(filename,0)
+    #img = cv2.medianBlur(img,5)
     cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
-
-    findCircles(img, cimg)
-    findStateLabels(cimg)
-    findStart(cimg)
+    ret,threshedImg = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+            
+    findLines(cimg)
+    #findCircles(img, cimg)
+    #findStateLabels(cimg)
+    #findStart(cimg)
     
+
     cv2.imwrite('output.png',cimg)
     cv2.destroyAllWindows()
     
