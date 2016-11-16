@@ -130,13 +130,11 @@ def findStart(cimg):
 def findLines(cimg):
     
     edges = cv2.Canny(cimg,50,150,apertureSize = 3)
-    lines = cv2.HoughLinesP(edges,1,np.pi/2,100, minLineLength = 50)[0]
+    lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
     for x1,y1,x2,y2 in lines:
         cv2.line(cimg,(x1,y1),(x2,y2),(0,255,0),1)
     
-    
     cv2.imwrite('houglinesresult.jpg',cimg)
-
     cv2.imwrite("cannylines.png",edges)
     
 def main():
