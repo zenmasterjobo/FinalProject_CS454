@@ -9,19 +9,20 @@ from PIL import ImageFilter
 
 # you can use this like s = State(label, coord, etc) 
 class State:
-    def __init__(self, label, coord_x, coord_y, initial, final, radius):
+    def __init__(self, label, coord_x, coord_y, initial, final, radius, circumference):
         self.label = label
         self.coord_x = coord_x
         self.coord_y = coord_y
         self.initial = initial
         self.final = final
         self.radius = radius
+        self.circumference = circumference
 
 #each element contains x,y,radius
 circleOCRBoundingBox = []
 States = []
 filename = raw_input("Please state the file you want to use: ")
-
+#filename = "Test1.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -32,20 +33,26 @@ def findCircles(img):
         cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
         squarePair.append(i[0])
         squarePair.append(i[1])
-        state = State(None, i[0], i[1], False, False, i[2]);
+        state = State(None, i[0], i[1], False, False, i[2], 2*i[2]*np.pi);
         States.append(state)
         squarePair.append(i[2]*math.sqrt(2))
         print "SQUARE PAIR: ", squarePair
         circleOCRBoundingBox.append(squarePair)
         print "BOUNDING BOX: ", circleOCRBoundingBox
-
+    val = float("inf")
+    for circle in States:
+        if circle.circumference < val:
+            val = circle.circumference
+    for circle in States:
+        if circle.circumference == val:
+            circle.final = True;
+        
         #def ocr(originaImage,x1,y1,x2,y2)
 # somehow do OCR on the bounding box and return that integer found
         
 def findStateLabels(img):
-    
     gray = cv2.imread(filename,0)
-
+    blur = cv2.GaussianBlur(gray,(5,5),3)
     idx = 0
     for i in circleOCRBoundingBox:
         idx += 1
@@ -65,29 +72,29 @@ def findStateLabels(img):
         cv2.rectangle(img,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
         #uncomment to draw rectangle
         
-        roi = gray[y1:y2, x1:x2]
-        cv2.imwrite(str(idx) + '.png', roi)
-        thresher= cv2.imread("1.png")
-        ret,thresh1 = cv2.threshold(thresher,128,255,cv2.THRESH_BINARY)
-        cv2.imwrite( '1.png', thresh1)
-        #roi is region of interest.
+        #roi = blur[y1:y2, x1:x2]
+        #cv2.imwrite(str(idx) + '.png', roi)
+        #thresher = cv2.imread("3.png")
+        #ret,thresh1 = cv2.threshold(thresher,178,255,cv2.THRESH_BINARY)
+        #cv2.imwrite( '3h.png', thresh1)
+        
+        # roi is region of interest.
         # it is a matrix of pixels i think
 
-    image_file = "1.png"
-    im = Image.open(image_file)
-    im.filter(ImageFilter.SHARPEN)
+    #image_file = "3h.png"
+    #im = Image.open(image_file)
+    #im.filter(ImageFilter.SHARPEN)
     #print ("here is the supposed image")
     #print im
-    i = pt.image_to_string(im)
-    print "=====Label======="
-    print repr(i)
-    print "=====Label=======\n"
+    #i = pt.image_to_string(im)
+    #print "=====Label======="
+    #print i
+    #print "=====Label=======\n"
     
 def findTriangle(img):
     localImg = cv2.imread(filename,0)
     ret,thresh = cv2.threshold(localImg,127,255,1)
     contours,h = cv2.findContours(thresh,1,2)
-   
     for cnt in contours:
         approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
         if len(approx)==3:
@@ -123,15 +130,34 @@ def findStart(img):
             state.initial = True
             cv2.circle(img,(state.coord_x,state.coord_y),state.radius,(255,0,0),2)
     for i in States:
-        print i.coord_x, i.coord_y, i.initial
-
+        print "x coordinate: ",i.coord_x
+        print "y coodinate: ",i.coord_y
+        print "Intial: ",i.initial
+        print "Circumference: ",i.circumference
+        print "Final: ",i.final
+        if i.final == True:
+            cv2.circle(img,(i.coord_x,i.coord_y),i.radius,(0,0,255),2)
+        print "===================="
 def findLines(img):
     localImg = cv2.imread(filename,0)
-    edges = cv2.Canny(localImg,50,150,apertureSize = 3)
-    lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
-    for x1,y1,x2,y2 in lines:
+    #edges = cv2.Canny(localImg,50,150,apertureSize = 3)
+    #lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
+    edges = cv2.Canny(localImg,10,10,apertureSize = 3)
+    lines = cv2.HoughLinesP(edges,2,np.pi/360,130,100,30)
+    for x1,y1,x2,y2 in lines[0]:
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
-    
+        print "X1: ", x1
+        print "Y1: ", y1
+        print "X2: ", x2
+        print "Y2: ", y2
+        print "-------------------"
+        #for i in States:
+        #    if(x1 - i.coord_x  < 50):
+        #        print "State x Coord: ", i.coord_x
+        #        print" WE TOUCHIN TIPS"
+        #        print "-------------------"
+                    
+        
 def main():
     img = cv2.imread(filename)
         
