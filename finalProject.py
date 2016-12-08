@@ -18,7 +18,6 @@ class State:
         self.radius = radius
 
 #each element contains x,y,radius
-img = ""
 circleOCRBoundingBox = []
 States = []
 filename = raw_input("Please state the file you want to use: ")
@@ -74,12 +73,12 @@ def findStateLabels(img):
         #roi is region of interest.
         # it is a matrix of pixels i think
 
-    image_file = '1.png'
+    image_file = '2.png'
 #    im = Image.open(image_file), config='-psm 10000')
     #im.filter(ImageFilter.SHARPEN)
     #print ("here is the supposed image")
     #print im
-    it = pt.image_to_string(Image.open(image_file), config='-psm 10000')
+    it = pt.image_to_string(Image.open(image_file), config='-psm 6')
     print "=====Label======="
     print (it)
     print "=====Label=======\n"
@@ -134,7 +133,6 @@ def findLines(img):
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
     
 def main():
-    global im
     img = cv2.imread(filename)
         
     findCircles(img)
