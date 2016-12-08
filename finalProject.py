@@ -82,15 +82,19 @@ def findStateLabel(baseImage, circleOCRBoundingBox):
     #im.filter(ImageFilter.SHARPEN)
     #print ("here is the supposed image")
     #print im
+    number = 0
     number = pt.image_to_string(Image.open(image_file), config='-psm 6')
+    
     print "=====Label======="
     if(number == "l"):
-        number = "1"
+        number = 1
     elif(number == "S" or number == "s"):
-        number = "5"
-    print (number)
+        number = 5
+    else:
+        number = extract_num(number)
     print "=====Label=======\n"
-
+    
+    print (number)
     return number
     
 def findTriangle(img):
@@ -141,6 +145,15 @@ def findLines(img):
     lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
     for x1,y1,x2,y2 in lines:
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
+def extract_num(input_str):
+    
+    if input_str is None or input_str == '':
+        return 0
+    out_number = ''
+    for ele in input_str:
+        if ele.isdigit():
+            out_number += ele
+            return int(out_number) 
     
 def main():
     img = cv2.imread(filename)
