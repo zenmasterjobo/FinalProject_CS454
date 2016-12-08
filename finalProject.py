@@ -115,18 +115,16 @@ def findStart(img):
     triangleTipY, triangleTipX = findTriangle(img)
     comparisonStates = []
     for state in States:
-        print " Y COORD: ", state.coord_y, "X COORD: ",\
-
-        \ and "THE JUST THE TIP Y + 2: ", triangleTipY
-        if(state.coord_y <= triangleTipY + 2
-           \and state.coord_y >= triangleTipY - 2):
+        print " Y COORD: ", state.coord_y, "X COORD: ",
+        print "THE JUST THE TIP Y + 2: ", triangleTipY
+        if(state.coord_y <= triangleTipY + 2 and state.coord_y >= triangleTipY - 2):
             comparisonStates.append(state)
 
     x = comparisonStates[0].coord_x
     initialState = ''
     for state in comparisonStates:
         if(state.coord_x >= triangleTipX):
-            if(statw.coord_x <= x):
+            if(state.coord_x <= x):
                 x = state.coord_x
                 initialState = state
 #    print initialState.coord_x, initialState.coord_y
