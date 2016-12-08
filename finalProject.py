@@ -33,55 +33,55 @@ def findCircles(img):
         squarePair.append(i[0])
         squarePair.append(i[1])
         state = State(None, i[0], i[1], False, False, i[2]);
-        States.append(state)
+        #States.append(state)
         squarePair.append(i[2]*math.sqrt(2))
         print "SQUARE PAIR: ", squarePair
-        circleOCRBoundingBox.append(squarePair)
+        #circleOCRBoundingBox.append(squarePair)
         print "BOUNDING BOX: ", circleOCRBoundingBox
-
+        state.label = findStateLabel(img, squarePair)
+        States.append(state) 
+        sqaurePair = []
         #def ocr(originaImage,x1,y1,x2,y2)
-# somehow do OCR on the bounding box and return that integer found
-        
-def findStateLabels(img):
-    global im
+        # somehow do OCR on the bounding box and return that integer found
+
+def findStateLabel(baseImage, circleOCRBoundingBox):
+    
     gray = cv2.imread(filename,0)
-
+    #gray = img
+                       
     idx = 0
-    for i in circleOCRBoundingBox:
-        idx += 1
-        point1 = []
-        point2 = []
-        
-        x1 = math.floor(i[0])
-        y1 = math.floor(i[1]-(i[2]/2))
-        x2 = math.floor(i[0]+(i[2]/2))
-        y2 = math.floor(i[1]+(i[2]/2))
-        point1.append(x1)
-        point1.append(y1)
-        
-        point2.append(x2)
-        point2.append(y2)
+    #for i in circleOCRBoundingBox:
+    idx += 1
+    point1 = []
+    point2 = []
+    
+    x1 = math.floor(circleOCRBoundingBox[0])
+    y1 = math.floor(circleOCRBoundingBox[1]-(circleOCRBoundingBox[2]/2))
+    x2 = math.floor(circleOCRBoundingBox[0]+(circleOCRBoundingBox[2]/2))
+    y2 = math.floor(circleOCRBoundingBox[1]+(circleOCRBoundingBox[2]/2))
+    point1.append(x1)
+    point1.append(y1)
+    
+    point2.append(x2)
+    point2.append(y2)
 
-        cv2.rectangle(img,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
-        #uncomment to draw rectangle
+    cv2.rectangle(baseImage,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
+    #uncomment to draw rectangle
+    
+    roi = gray[y1:y2, x1:x2]
+    cv2.imwrite('1.png', roi)
+    thresher= cv2.imread('1.png')
+    ret,thresh1 = cv2.threshold(thresher,128,255,cv2.THRESH_BINARY)
+    cv2.imwrite( '1.png', thresh1)
         
-        roi = gray[y1:y2, x1:x2]
-        cv2.imwrite(str(idx) + '.png', roi)
-        thresher= cv2.imread("1.png")
-        ret,thresh1 = cv2.threshold(thresher,128,255,cv2.THRESH_BINARY)
-        cv2.imwrite( '1.png', thresh1)
-        #roi is region of interest.
-        # it is a matrix of pixels i think
+    image_file = '1.png'
 
-    image_file = '2.png'
-#    im = Image.open(image_file), config='-psm 10000')
-    #im.filter(ImageFilter.SHARPEN)
-    #print ("here is the supposed image")
-    #print im
-    it = pt.image_to_string(Image.open(image_file), config='-psm 6')
+    number = pt.image_to_string(Image.open(image_file), config='-psm 6')
     print "=====Label======="
-    print (it)
+    print (number)
     print "=====Label=======\n"
+
+    return number
     
 def findTriangle(img):
     localImg = cv2.imread(filename,0)
@@ -136,10 +136,11 @@ def main():
     img = cv2.imread(filename)
         
     findCircles(img)
-    findStateLabels(img)
+    #findStateLabels(img)
     findStart(img)
     findLines(img)
-    
+    for i in States:
+        print i.label, i.coord_x, i.coord_y, i.initial, i.final, i.radius
     cv2.imwrite('output.png',img)
     cv2.destroyAllWindows()
     
