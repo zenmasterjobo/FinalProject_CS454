@@ -146,17 +146,21 @@ def findLines(img):
     localImg = cv2.imread(filename,0)
     #edges = cv2.Canny(localImg,50,150,apertureSize = 3)
     #lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
-    edges = cv2.Canny(localImg,10,10,apertureSize = 3)
-    lines = cv2.HoughLinesP(edges,rho=2,theta=np.pi/100,threshold=10,\
-                            minLineLength=60,maxLineGap=0)
-    for x1,y1,x2,y2 in lines[0]:
-        cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
-        print "X1: ", x1
+    edges = cv2.Canny(localImg,500,150,apertureSize = 3)
+    minLineLength = img.shape[1]-300
+    lines = cv2.HoughLinesP(image=edges,rho=0.02,theta=np.pi/500,threshold=10,\
+                            lines=np.array([]), minLineLength=minLineLength,maxLineGap=100)
+    a,b,c = lines.shape
+    for i in range(a):
+        cv2.line(img, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), 255,0,0)
+
+'''     print "X1: ", x1
         print "Y1: ", y1
         print "X2: ", x2
         print "Y2: ", y2
         print "-------------------"
-        #for i in States:
+'''   
+     #for i in States:
         #    if(x1 - i.coord_x  < 50):
         #        print "State x Coord: ", i.coord_x
         #        print" WE TOUCHIN TIPS"
