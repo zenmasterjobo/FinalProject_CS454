@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 import cv2
 import cv2.cv as cv
 import numpy as np
@@ -73,13 +74,17 @@ def findStateLabels(img):
         #roi is region of interest.
         # it is a matrix of pixels i think
 
-    image_file = '2.png'
+    image_file = '6.png'
 #    im = Image.open(image_file), config='-psm 10000')
     #im.filter(ImageFilter.SHARPEN)
     #print ("here is the supposed image")
     #print im
     it = pt.image_to_string(Image.open(image_file), config='-psm 6')
     print "=====Label======="
+    if(it == "l"):
+        it = "1"
+    elif(it == "S" or it == "s"):
+        it = "5"
     print (it)
     print "=====Label=======\n"
     
