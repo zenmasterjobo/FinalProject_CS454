@@ -21,11 +21,12 @@ class State:
 #each element contains x,y,radius
 circleOCRBoundingBox = []
 States = []
-filename = raw_input("Please state the file you want to use: ")
-#filename = "Test1.png"
+#filename = raw_input("Please state the file you want to use: ")
+filename = "Test1.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
-    circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
+    circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,\
+                               20,param1=50,param2=50,minRadius=10,maxRadius=0)
     circles = np.uint16(np.around(circles))
     for i in circles[0,:]:
         squarePair = []
@@ -101,7 +102,9 @@ def findTriangle(img):
             print "triangle"
             cv2.drawContours(img,[cnt],0,(0,255,0),-1)
 
-            print "1st field: ", cnt[0], "2nd field : ", cnt[1], "3rd Field: ", cnt[2], "4th field: ", cnt[3], "5th field: ", cnt[4]
+            print "1st field: ", cnt[0], "2nd field : ", cnt[1],\
+                "3rd Field: ", cnt[2],\
+                "4th field: ", cnt[3], "5th field: ", cnt[4]
             #print "Ret : ", ret
             triangleTipY = approx[1][0][1]
             triangleTipX = approx[1][0][0]
@@ -112,15 +115,18 @@ def findStart(img):
     triangleTipY, triangleTipX = findTriangle(img)
     comparisonStates = []
     for state in States:
-        print " Y COORD: ", state.coord_y, "X COORD: ", state.coord_x, "and THE JUST THE TIP Y + 2: ", triangleTipY
-        if(state.coord_y <=  triangleTipY + 2 and state.coord_y >= triangleTipY - 2):
+        print " Y COORD: ", state.coord_y, "X COORD: ",\
+
+        \ and "THE JUST THE TIP Y + 2: ", triangleTipY
+        if(state.coord_y <= triangleTipY + 2
+           \and state.coord_y >= triangleTipY - 2):
             comparisonStates.append(state)
 
     x = comparisonStates[0].coord_x
     initialState = ''
     for state in comparisonStates:
         if(state.coord_x >= triangleTipX):
-            if(state.coord_x <= x):
+            if(statw.coord_x <= x):
                 x = state.coord_x
                 initialState = state
 #    print initialState.coord_x, initialState.coord_y
@@ -143,7 +149,8 @@ def findLines(img):
     #edges = cv2.Canny(localImg,50,150,apertureSize = 3)
     #lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
     edges = cv2.Canny(localImg,10,10,apertureSize = 3)
-    lines = cv2.HoughLinesP(edges,2,np.pi/360,130,100,30)
+    lines = cv2.HoughLinesP(edges,rho=2,theta=np.pi/100,threshold=10,\
+                            minLineLength=60,maxLineGap=0)
     for x1,y1,x2,y2 in lines[0]:
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
         print "X1: ", x1
