@@ -22,7 +22,7 @@ img = ""
 circleOCRBoundingBox = []
 States = []
 #filename = raw_input("Please state the file you want to use: ")
-filename = "TestWeb.png"
+filename = "Test1.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -128,24 +128,40 @@ def findStart(img):
 
 def findLines(img):
     localImg = cv2.imread(filename,0)
+    height, width = localImg.shape
     edges = cv2.Canny(localImg,50,150,apertureSize = 3)
     lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
     for x1,y1,x2,y2 in lines:
-        #calculate slope based on x1 y1 x2 y2
-        cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
-        rise = y1-y2
-        run = x1 -x2
+        rise = y2-y1
+        run = x2-x1
         slope = rise/run
-        print "SLOPE: ",slope
-    
-#apply the slope positvely by 1 pixel
+        while(isInImage(width,height,x2,y2)):
+            cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
+            for state in States:
+                if((x2 - state.coord_x)**2 + (y2 - state.coord_y)**2 < state.radius**2):
+                    print state.label
+        break
+                
+                #apply the slope positvely by 1 pixel
 
     #check that againts our array of points for the circle area
 
     #if that pixel is not inside the circle repeat
 
     #if it is inside the circle repeat this process in other direction
-        
+
+def isInImage(width,height,x,y):
+    if(x > width):
+        return False
+    if(y > height):
+        return False
+    if(x < 0):
+        return False
+    if(y < 0):
+        return False
+    else:
+        return True
+    
 def main():
     global im
     img = cv2.imread(filename)
