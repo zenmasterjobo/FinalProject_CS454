@@ -22,7 +22,7 @@ class State:
 circleOCRBoundingBox = []
 States = []
 #filename = raw_input("Please state the file you want to use: ")
-filename = "Test1.png"
+filename = "TestWeb.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -150,7 +150,7 @@ def findLines(img):
     height, width = localImg.shape
     edges = cv2.Canny(localImg,50,150,apertureSize = 3)
     lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
-    print lines
+    print "Lines: ",lines
     for x1,y1,x2,y2 in lines:
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
         rise = y2-y1
@@ -159,28 +159,52 @@ def findLines(img):
         print "i ran"
         print "checking: ",x1, y1, x2 , y2
         if(isInImage(width,height,x2,y2)):
+            y1 -= rise/2
             y2 += rise/2
             print "rise: ",rise
             x2 += run/2
+            x1 -= run/2
             print "run: ", run
             
             for state in States:
                 print "state coordx: " , state.coord_x
                 print "state coordy: " , state.coord_y
-                dx = state.coord_x - x2
-                dx = pow(dx, 2)
-                print "dx: " , dx
-                dy = state.coord_y - y2
-                dy = pow(dy, 2)
-                print "dy: " , dy
+                deltax_point1 = state.coord_x - x1
+                deltax_point1 = pow(deltax_point1, 2)
+                
+                deltax_point2 = state.coord_x - x2
+                deltax_point2 = pow(deltax_point2, 2)
+
+                print "deltax_point1: " , deltax_point1
+                print "deltax_point2: " , deltax_point2
+                
+                deltay_point1 = state.coord_y - y1
+                deltay_point1 = pow(deltay_point1, 2)
+                
+                deltay_point2 = state.coord_y - y2
+                deltay_point2 = pow(deltay_point2, 2)
+
+                print "deltay_point1: " , deltay_point1
+                print "deltay_point2: " , deltay_point2
                 radius = state.radius
-                sqrtdxdy = math.sqrt(dx + dy)
-                print sqrtdxdy , radius
-                if(sqrtdxdy <= radius):
+                sqrtdxdy_point1 = math.sqrt(deltax_point1 + deltay_point1)
+                sqrtdxdy_point2 = math.sqrt(deltax_point2 + deltay_point2)
+
+                print sqrtdxdy_point1 , radius
+                print sqrtdxdy_point2 , radius
+                if(sqrtdxdy_point1 <= radius):
                     print "state----------: " , state.label
-                    cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
-                y2 += rise/2
-                x2 += run/2
+                    cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+                    
+                if(sqrtdxdy_point2 <= radius):
+                    print "state----------: " , state.label
+                    cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+
+                y1 -= rise/4
+                x1 -= run/4
+
+                y2 += rise/3
+                x2 += run/3
         #to run once
         #break
                 #apply the slope positvely by 1 pixel
