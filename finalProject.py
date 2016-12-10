@@ -22,7 +22,7 @@ img = ""
 circleOCRBoundingBox = []
 States = []
 #filename = raw_input("Please state the file you want to use: ")
-filename = "TestWeb.png"
+filename = "Test1.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -140,9 +140,9 @@ def findLines(img):
         print "checking: ",x1, y1, x2 , y2
         if(isInImage(width,height,x2,y2)):
             y2 += rise/2
-            print rise
+            print "rise: ",rise
             x2 += run/2
-            print run
+            print "run: ", run
             
             for state in States:
                 print "state coordx: " , state.coord_x
