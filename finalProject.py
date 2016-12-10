@@ -21,8 +21,8 @@ class State:
 #each element contains x,y,radius
 circleOCRBoundingBox = []
 States = []
-filename = raw_input("Please state the file you want to use: ")
-
+#filename = raw_input("Please state the file you want to use: ")
+filename = "Test1.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -42,8 +42,10 @@ def findCircles(img):
         state.label = findStateLabel(img, squarePair)
         States.append(state) 
         sqaurePair = []
-        #def ocr(originaImage,x1,y1,x2,y2)
-        # somehow do OCR on the bounding box and return that integer found
+        #print "SQUARE PAIR: ", squarePair
+        circleOCRBoundingBox.append(squarePair)
+        #print "BOUNDING BOX: ", circleOCRBoundingBox
+
 
 def findStateLabel(baseImage, circleOCRBoundingBox):
     
@@ -93,6 +95,10 @@ def findStateLabel(baseImage, circleOCRBoundingBox):
     else:
         number = extract_num(number)
     print "=====Label=======\n"
+    it = pt.image_to_string(Image.open(image_file), config='-psm 10000')
+    #print "=====Label======="
+    #print (it)
+    #print "=====Label=======\n"
     
     print (number)
     return number
@@ -105,10 +111,10 @@ def findTriangle(img):
     for cnt in contours:
         approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
         if len(approx)==3:
-            print "triangle"
+            #print "triangle"
             cv2.drawContours(img,[cnt],0,(0,255,0),-1)
 
-            print "1st field: ", cnt[0], "2nd field : ", cnt[1], "3rd Field: ", cnt[2], "4th field: ", cnt[3], "5th field: ", cnt[4]
+            #print "1st field: ", cnt[0], "2nd field : ", cnt[1], "3rd Field: ", cnt[2], "4th field: ", cnt[3], "5th field: ", cnt[4]
             #print "Ret : ", ret
             triangleTipY = approx[1][0][1]
             triangleTipX = approx[1][0][0]
@@ -119,7 +125,7 @@ def findStart(img):
     triangleTipY, triangleTipX = findTriangle(img)
     comparisonStates = []
     for state in States:
-        print " Y COORD: ", state.coord_y, "X COORD: ", state.coord_x, "and THE JUST THE TIP Y + 2: ", triangleTipY
+        #print " Y COORD: ", state.coord_y, "X COORD: ", state.coord_x, "and THE JUST THE TIP Y + 2: ", triangleTipY
         if(state.coord_y <=  triangleTipY + 2 and state.coord_y >= triangleTipY - 2):
             comparisonStates.append(state)
 
@@ -133,27 +139,84 @@ def findStart(img):
 #    print initialState.coord_x, initialState.coord_y
     for state in States:
         if(initialState.coord_x == state.coord_x and initialState.coord_y == state.coord_y):
-            print state.coord_x, state.coord_y
+            #print state.coord_x, state.coord_y
             state.initial = True
             cv2.circle(img,(state.coord_x,state.coord_y),state.radius,(255,0,0),2)
-    for i in States:
-        print i.coord_x, i.coord_y, i.initial
+    #for i in States:
+        #print i.coord_x, i.coord_y, i.initial
 
 def findLines(img):
     localImg = cv2.imread(filename,0)
+    height, width = localImg.shape
     edges = cv2.Canny(localImg,50,150,apertureSize = 3)
     lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
+    print lines
     for x1,y1,x2,y2 in lines:
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
+        rise = y2-y1
+        run = x2-x1
+        #slope = rise/run
+        print "i ran"
+        print "checking: ",x1, y1, x2 , y2
+        if(isInImage(width,height,x2,y2)):
+            y2 += rise/2
+            print "rise: ",rise
+            x2 += run/2
+            print "run: ", run
+            
+            for state in States:
+                print "state coordx: " , state.coord_x
+                print "state coordy: " , state.coord_y
+                dx = state.coord_x - x2
+                dx = pow(dx, 2)
+                print "dx: " , dx
+                dy = state.coord_y - y2
+                dy = pow(dy, 2)
+                print "dy: " , dy
+                radius = state.radius
+                sqrtdxdy = math.sqrt(dx + dy)
+                print sqrtdxdy , radius
+                if(sqrtdxdy <= radius):
+                    print "state----------: " , state.label
+                    cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
+                y2 += rise/2
+                x2 += run/2
+        #to run once
+        #break
+                #apply the slope positvely by 1 pixel
+
+    #check that againts our array of points for the circle area
+
+    #if that pixel is not inside the circle repeat
+
+    #if it is inside the circle repeat this process in other direction
+
 def extract_num(input_str):
-    
     if input_str is None or input_str == '':
         return 0
+    
     out_number = ''
     for ele in input_str:
         if ele.isdigit():
             out_number += ele
             return int(out_number) 
+
+def isInImage(width,height,x,y):
+    if(x > width):
+        print "not in image"
+        return False
+    if(y > height):
+        print "not in image"
+        return False
+    if(x < 0):
+        print "not in image"
+        return False
+    if(y < 0):
+        print "not in image"
+        return False
+    else:
+        return True
+
     
 def main():
     img = cv2.imread(filename)
