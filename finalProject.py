@@ -156,8 +156,12 @@ def findLines(img):
         rise = y2-y1
         run = x2-x1
         #slope = rise/run
-        print "i ran"
+        #print "i ran"
+        #lengthAB = sqrt(((x1-x2)**2)+((y1-y2)**2))
         print "checking: ",x1, y1, x2 , y2
+        #newPointx = x2+(x2-x1)/lengthAB*1.1)
+        #newPointy = y2+(y2-y1)/lengthAB*1.1)
+        
         if(isInImage(width,height,x2,y2)):
             y1 -= rise/2
             y2 += rise/2
