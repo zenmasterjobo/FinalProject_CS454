@@ -10,19 +10,22 @@ from PIL import ImageFilter
 
 # you can use this like s = State(label, coord, etc) 
 class State:
-    def __init__(self, label, coord_x, coord_y, initial, final, radius):
+    def __init__(self, label, coord_x, coord_y, initial, final, radius, circumference):
         self.label = label
         self.coord_x = coord_x
         self.coord_y = coord_y
         self.initial = initial
         self.final = final
         self.radius = radius
-
+        self.circumference = circumference
 #each element contains x,y,radius
 circleOCRBoundingBox = []
 States = []
+StatePairs = []
+height = 0 
+width = 0
 #filename = raw_input("Please state the file you want to use: ")
-filename = "TestWeb.png"
+filename = "Test1.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -33,7 +36,7 @@ def findCircles(img):
         cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
         squarePair.append(i[0])
         squarePair.append(i[1])
-        state = State(None, i[0], i[1], False, False, i[2]);
+        state = State(None, i[0], i[1], False, False, i[2], 2*i[2]*np.pi);
         #States.append(state)
         squarePair.append(i[2]*math.sqrt(2))
         print "SQUARE PAIR: ", squarePair
@@ -45,7 +48,13 @@ def findCircles(img):
         #print "SQUARE PAIR: ", squarePair
         circleOCRBoundingBox.append(squarePair)
         #print "BOUNDING BOX: ", circleOCRBoundingBox
-
+    val = float("inf")
+    for circle in States:
+        if circle.circumference < val:
+            val = circle.circumference
+    for circle in States:
+        if circle.circumference == val:
+            circle.final = True
 
 def findStateLabel(baseImage, circleOCRBoundingBox):
     
@@ -92,6 +101,8 @@ def findStateLabel(baseImage, circleOCRBoundingBox):
         number = 1
     elif(number == "S" or number == "s"):
         number = 5
+    elif(number == None or number == ""):
+        number = 0
     else:
         number = extract_num(number)
     print "=====Label=======\n"
@@ -147,73 +158,128 @@ def findStart(img):
 
 def findLines(img):
     localImg = cv2.imread(filename,0)
-    height, width = localImg.shape
+    print "height: ", height
+    print "width: ", width
     edges = cv2.Canny(localImg,50,150,apertureSize = 3)
     lines = cv2.HoughLinesP(image=edges,rho=0.50,theta=np.pi/100, threshold=50,lines=np.array([]), minLineLength=40)[0]
+    state = ""
+    
     print "Lines: ",lines
     for x1,y1,x2,y2 in lines:
+        pair = []
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
-        rise = y2-y1
-        run = x2-x1
-        #slope = rise/run
-        print "i ran"
+        lengthAB = math.sqrt(((x1-x2)**2)+((y1-y2)**2))
+
+        newPointx1 = (x1+(x1-x2)/(lengthAB*.2))
+        newPointy1 = (y1+(y1-y2)/(lengthAB*.2))
+
+        newPointx2 = (x2+(x2-x1)/(lengthAB*.2))
+        newPointy2 = (y2+(y2-y1)/(lengthAB*.2))
+
+        
         print "checking: ",x1, y1, x2 , y2
-        if(isInImage(width,height,x2,y2)):
-            y1 -= rise/2
-            y2 += rise/2
-            print "rise: ",rise
-            x2 += run/2
-            x1 -= run/2
-            print "run: ", run
+        #print "newPointx1: ", newPointx1
+        #print "newPointy1: ", newPointy1
+
+        print "newPointx2: ", newPointx2
+        print "newPointy2: ", newPointy2
+
+        flag1 = False
+        flag2 = False
+        while(flag1 == False):
+            print "newPointx1: ", newPointx1
+            print "newPointy1: ", newPointy1
+            state, flag1 = inState(newPointx1, newPointy1)
+            newPointx1, newPointy1 = calculateNewPoint1(newPointx1,newPointy1, x1, y1)
+            cv2.line(img,(int(newPointx1),int(newPointy1)),(x2,y2),(255,0,0),2)
+            print ("newX1" , newPointx1, "newY1" , newPointy1)
+            if(flag1 == True):
+                pair.append(state)
+                print "pair:################################## ", pair
+            if( not( isInImage(width,height,newPointx1, newPointy1))):
+                pair.append("")
+                flag1 = True
+                
+        
+        while(flag2 == False):
+            print "Started from the bottom"
+            state, flag2 = inState(newPointx2, newPointy2)
+            newPointx2, newPointy2 = calculateNewPoint2(newPointx2,newPointy2, x2, y2)
+
+            cv2.line(img,(x1,y1),(int(newPointx2),int(newPointy2)),(0,0,255),2)
+            cv2.imwrite( 'lalalalala.png', img)
+            if(flag2 == True):
+                pair.append(state)
+                print "pair: ", pair
+            if( not( isInImage(width,height,newPointx2, newPointy2))):
+                pair.append("")
+                flag2 = True
+                                #if(pair[0] == "" or pair[1] == ""):
+         #   continue
+        #else:
+        StatePairs.append(pair)
+        
+
+def inState(x,y):
+    global States
+    if(isInImage(width,height,x,y)):
+        for state123 in States:
+            print "state coordx: " , state123.coord_x
+            print "state coordy: " , state123.coord_y
             
-            for state in States:
-                print "state coordx: " , state.coord_x
-                print "state coordy: " , state.coord_y
-                deltax_point1 = state.coord_x - x1
-                deltax_point1 = pow(deltax_point1, 2)
-                
-                deltax_point2 = state.coord_x - x2
-                deltax_point2 = pow(deltax_point2, 2)
+            deltax = state123.coord_x - x
+            deltax = pow(deltax, 2)
+            #print "deltax_point1: " , deltax
+            
+            deltay = state123.coord_y - y
+            deltay = pow(deltay, 2)
+            #print "deltay: " , deltay
 
-                print "deltax_point1: " , deltax_point1
-                print "deltax_point2: " , deltax_point2
-                
-                deltay_point1 = state.coord_y - y1
-                deltay_point1 = pow(deltay_point1, 2)
-                
-                deltay_point2 = state.coord_y - y2
-                deltay_point2 = pow(deltay_point2, 2)
+            radius = state123.radius
+            sqrtdxdy = math.sqrt(deltax + deltay)
+            print("sqrt: ", sqrtdxdy, "raidus: " , radius)
+        
+            if(sqrtdxdy <= radius):
+                #if state123.label == None:
+                #    state123.label = str(0)
+                return state123.label, True
 
-                print "deltay_point1: " , deltay_point1
-                print "deltay_point2: " , deltay_point2
-                radius = state.radius
-                sqrtdxdy_point1 = math.sqrt(deltax_point1 + deltay_point1)
-                sqrtdxdy_point2 = math.sqrt(deltax_point2 + deltay_point2)
+            #else:
+             #   print ("quiting in the return of inState")
+             #   return "", False
+    return "" , False    
 
-                print sqrtdxdy_point1 , radius
-                print sqrtdxdy_point2 , radius
-                if(sqrtdxdy_point1 <= radius):
-                    print "state----------: " , state.label
-                    cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-                    
-                if(sqrtdxdy_point2 <= radius):
-                    print "state----------: " , state.label
-                    cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+def calculateNewPoint1(newPointx, newPointy, x1, y1):
+    lengthAB = math.sqrt(((x1-newPointx)**2)+((y1-newPointy)**2))
+    newX = (newPointx+(newPointx-x1)/(lengthAB*.2))
+    newY = (newPointy+(newPointy-y1)/(lengthAB*.2))
+    return newX, newY
 
-                y1 -= rise/4
-                x1 -= run/4
+    
+def calculateNewPoint2(newPointx, newPointy, x2, y2):
+    lengthAB = math.sqrt(((x2-newPointx)**2)+((y2-newPointy)**2))
+    newX = (newPointx+(newPointx-x2)/(lengthAB*.2))
+    newY = (newPointy+(newPointy-y2)/(lengthAB*.2))
+    return newX, newY
 
-                y2 += rise/3
-                x2 += run/3
-        #to run once
-        #break
-                #apply the slope positvely by 1 pixel
 
-    #check that againts our array of points for the circle area
+def isInImage(width,height,x,y):
+    print( "widht: ", width, "height: ", height)
+    if(x > width):
+        print "not in image: out of bounds right"
+        return False
+    if(y > height):
+        print "not in image: out of bounds bottom"
+        return False
+    if(x < 0):
+        print "not in image: out of bounds left"
+        return False
+    if(y < 0):
+        print "not in image: out of bounds top"
+        return False
+    else:
+        return True
 
-    #if that pixel is not inside the circle repeat
-
-    #if it is inside the circle repeat this process in other direction
 
 def extract_num(input_str):
     if input_str is None or input_str == '':
@@ -225,32 +291,19 @@ def extract_num(input_str):
             out_number += ele
             return int(out_number) 
 
-def isInImage(width,height,x,y):
-    if(x > width):
-        print "not in image"
-        return False
-    if(y > height):
-        print "not in image"
-        return False
-    if(x < 0):
-        print "not in image"
-        return False
-    if(y < 0):
-        print "not in image"
-        return False
-    else:
-        return True
-
     
 def main():
+    global height, width
     img = cv2.imread(filename)
-        
+    imgTaco = cv2.imread(filename,0)
+    height, width = imgTaco.shape
     findCircles(img)
     #findStateLabels(img)
     findStart(img)
     findLines(img)
     for i in States:
         print i.label, i.coord_x, i.coord_y, i.initial, i.final, i.radius
+        print "hello"
     cv2.imwrite('output.png',img)
     cv2.destroyAllWindows()
     
