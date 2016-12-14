@@ -24,8 +24,9 @@ States = []
 StatePairs = []
 height = 0 
 width = 0
+
 #filename = raw_input("Please state the file you want to use: ")
-filename = "Test1.png"
+filename = "TestWeb.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -157,6 +158,7 @@ def findStart(img):
         #print i.coord_x, i.coord_y, i.initial
 
 def findLines(img):
+    global StatePairs
     localImg = cv2.imread(filename,0)
     print "height: ", height
     print "width: ", width
@@ -291,9 +293,26 @@ def extract_num(input_str):
             out_number += ele
             return int(out_number) 
 
-    
+def cropLines(pairs , img):
+    global States
+    leftCenter, rightCenter = (0,0)
+    for left, right in pairs:
+        for state in States:
+            if (state.label  == left):
+                leftCenter = (state.coord_x , state.coord_y)
+                print "leftCenter: ", leftCenter
+            if (state.label  == right):
+                rightCenter = (state.coord_x , state.coord_y)
+                print "rightCenter: ", rightCenter
+        createLineCropping(leftCenter, rightCenter, img)
+                
+def createLineCropping(leftCenter, rightCenter, img):
+    roi = img[leftCenter[0]:leftCenter[, x1:x2]
+        cv2.imwrite('1.png', roi)
+                
+                
 def main():
-    global height, width
+    global height, width, StatePairs
     img = cv2.imread(filename)
     imgTaco = cv2.imread(filename,0)
     height, width = imgTaco.shape
@@ -301,11 +320,14 @@ def main():
     #findStateLabels(img)
     findStart(img)
     findLines(img)
+    cropLines(StatePairs , img)
     for i in States:
         print i.label, i.coord_x, i.coord_y, i.initial, i.final, i.radius
         print "hello"
     cv2.imwrite('output.png',img)
     cv2.destroyAllWindows()
-    
+    for i in range (len(StatePairs)):
+        print StatePairs[i]
+
 if __name__ == "__main__":
 	main()
