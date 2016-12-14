@@ -304,11 +304,33 @@ def cropLines(pairs , img):
             if (state.label  == right):
                 rightCenter = (state.coord_x , state.coord_y)
                 print "rightCenter: ", rightCenter
+
+        
         createLineCropping(leftCenter, rightCenter, img)
                 
 def createLineCropping(leftCenter, rightCenter, img):
-    roi = img[leftCenter[0]:leftCenter[, x1:x2]
-        cv2.imwrite('1.png', roi)
+    x1 = leftCenter[0]
+    x2 = rightCenter[0]
+    
+        
+    y1 = leftCenter[1]
+    y2 = rightCenter[1]
+    
+    rise = (y2 - y1)
+    run = (x2 - x1)
+    print "RISE: ", rise
+    print "Run: ", run 
+    slope = rise/run
+    print "SLOPE: ", slope
+    if(slope < 0):
+        perp = (run/rise)
+        print "PERPINDICULAR: ", perp
+    else:
+        perp = ((run/rise) * -1)
+        print "OTHER PERPINDICK: ", perp
+        
+    #roi = img[leftCenter[0]:leftCenter[, x1:x2]
+    #    cv2.imwrite('1.png', roi)
                 
                 
 def main():
