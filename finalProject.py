@@ -10,14 +10,14 @@ from PIL import ImageFilter
 
 # you can use this like s = State(label, coord, etc) 
 class State:
-    def __init__(self, label, coord_x, coord_y, initial, final, radius):
+    def __init__(self, label, coord_x, coord_y, initial, final, radius, circumference):
         self.label = label
         self.coord_x = coord_x
         self.coord_y = coord_y
         self.initial = initial
         self.final = final
         self.radius = radius
-
+        self.circumference = circumference
 #each element contains x,y,radius
 circleOCRBoundingBox = []
 States = []
@@ -25,7 +25,7 @@ StatePairs = []
 height = 0 
 width = 0
 #filename = raw_input("Please state the file you want to use: ")
-filename = "TestWeb.png"
+filename = "Test1.png"
 def findCircles(img):
     gray = cv2.imread(filename,0)
     circles = cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1,20,param1=50,param2=50,minRadius=10,maxRadius=0)
@@ -36,7 +36,7 @@ def findCircles(img):
         cv2.circle(img,(i[0],i[1]),2,(0,0,255),3)
         squarePair.append(i[0])
         squarePair.append(i[1])
-        state = State(None, i[0], i[1], False, False, i[2]);
+        state = State(None, i[0], i[1], False, False, i[2], 2*i[2]*np.pi);
         #States.append(state)
         squarePair.append(i[2]*math.sqrt(2))
         print "SQUARE PAIR: ", squarePair
@@ -48,7 +48,13 @@ def findCircles(img):
         #print "SQUARE PAIR: ", squarePair
         circleOCRBoundingBox.append(squarePair)
         #print "BOUNDING BOX: ", circleOCRBoundingBox
-
+    val = float("inf")
+    for circle in States:
+        if circle.circumference < val:
+            val = circle.circumference
+    for circle in States:
+        if circle.circumference == val:
+            circle.final = True
 
 def findStateLabel(baseImage, circleOCRBoundingBox):
     
@@ -297,6 +303,7 @@ def main():
     findLines(img)
     for i in States:
         print i.label, i.coord_x, i.coord_y, i.initial, i.final, i.radius
+        print "hello"
     cv2.imwrite('output.png',img)
     cv2.destroyAllWindows()
     
