@@ -121,6 +121,7 @@ def findTriangle(img):
     contours,h = cv2.findContours(thresh,1,2)
    
     for cnt in contours:
+        print cnt , "#-----------------------------------------------"
         approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
         if len(approx)==3:
             #print "triangle"
@@ -293,7 +294,7 @@ def extract_num(input_str):
             out_number += ele
             return int(out_number) 
 
-def cropLines(pairs , img):
+def cropLines(pairs , img, imgTaco):
     global States
     leftCenter, rightCenter = (0,0)
     for left, right in pairs:
@@ -306,13 +307,13 @@ def cropLines(pairs , img):
                 print "rightCenter: ", rightCenter
                 
         radius = state.radius
-        createLineCropping(leftCenter, rightCenter, img, radius)
+        createLineCropping(leftCenter, rightCenter, img,imgTaco , radius)
                 
-def createLineCropping(leftCenter, rightCenter, img, radius):
+def createLineCropping(leftCenter, rightCenter, img,imgTaco ,radius):
+  
     perp = 0
     x1 = float(leftCenter[0])
     x2 = float(rightCenter[0])
-    
         
     y1 = float(leftCenter[1])
     y2 = float(rightCenter[1])
@@ -324,26 +325,17 @@ def createLineCropping(leftCenter, rightCenter, img, radius):
     if(rise == 0):
         y1 -= radius
         y2 += radius
+        cv2.rectangle(imgTaco,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),2)
+                
     if(run == 0):
         x1 -= radius
         x2 += radius
+        cv2.rectangle(imgTaco,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),2)
+                
     if(rise !=0 and run !=0):
-        #print "RISE MOTHER FUCKER RISE: ", rise
-        #print "RUN MOTHER FUCKER RUN: ", run
         slope = float(rise/run)
         slopeInverse = (float(run/rise) * float(-1))
-        #print "OTHER PERPINDICK: ", perp
-        #lengthAB = math.sqrt(((x2-x1)**2)+((y2-y1)**2))
-        #x = (x1 + x2)/2
-        #y = (y1 + y2)/2
-        #angle = math.degrees(math.atan(slope))
-        #cv2.RotatedRect((x,y),(radius,lengthAB),angle)
-        #cord = [[x1,y1],[x2,y2]]
-        #cord = [[x1,y1],[x2,y2]]
-        #rect = cv2.minAreaRect(cord)
-        #box = cv2.cv.BoxPoints(rect)
-        #box = np.int0(box)
-        #cv2.drawContours(img,[box],0,(0,0,255),2)
+        
         ax1 = x1
         ay1 = y1
         ax2 = x2
@@ -362,12 +354,14 @@ def createLineCropping(leftCenter, rightCenter, img, radius):
         py22 = ay2 - slopeInverse * s
         cv2.line(img,(int(ax2),int(ay2)),(int(px21),int(py21)),(147,20,255),2)
         cv2.line(img,(int(px22),int(py22)),(int(ax2),int(ay2)),(147,20,255),2)
+
+        contours = [np.array([[px11,py11],[px12,py12],[px22,py22],[px21,py21]], dtype=np.int32)]
+
         
-    if (perp == 0):
-        cv2.rectangle(img,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
-        #roi = img[y1:y2, x1:x2]
-        #cv2.imwrite(, roi)
-                
+        for cnt in contours:
+            cv2.drawContours(imgTaco,[cnt],0,(0,0,255),2)
+                        
+                        
                 
 def main():
     global height, width, StatePairs
@@ -378,11 +372,13 @@ def main():
     #findStateLabels(img)
     findStart(img)
     findLines(img)
-    cropLines(StatePairs , img)
+    imgTaco = cv2.imread(filename)
+    cropLines(StatePairs , img, imgTaco)
     for i in States:
         print i.label, i.coord_x, i.coord_y, i.initial, i.final, i.radius
         print "hello"
     cv2.imwrite('output.png',img)
+    cv2.imwrite("boudingRectanglesForTransitionOCR.png",imgTaco)
     cv2.destroyAllWindows()
     for i in range (len(StatePairs)):
         print StatePairs[i]
