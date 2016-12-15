@@ -309,26 +309,33 @@ def cropLines(pairs , img):
         createLineCropping(leftCenter, rightCenter, img)
                 
 def createLineCropping(leftCenter, rightCenter, img):
-    x1 = leftCenter[0]
-    x2 = rightCenter[0]
+    perp = 0
+    x1 = int(leftCenter[0])
+    x2 = int(rightCenter[0])
     
         
-    y1 = leftCenter[1]
-    y2 = rightCenter[1]
+    y1 = int(leftCenter[1])
+    y2 = int(rightCenter[1])
     
     rise = (y2 - y1)
     run = (x2 - x1)
     print "RISE: ", rise
     print "Run: ", run 
-    slope = rise/run
-    print "SLOPE: ", slope
-    if(slope < 0):
-        perp = (run/rise)
-        print "PERPINDICULAR: ", perp
+    if(rise == 0):
+        y1 -= 10
+        y2 += 10
+    if(run == 0):
+        x1 -= 10
+        x2 +=10
     else:
-        perp = ((run/rise) * -1)
-        print "OTHER PERPINDICK: ", perp
-        
+        print " RISE MOTHER FUCKER RISE: ", rise
+        print " RUN MOTHER FUCKER RUN: ", run
+        slope = rise/run
+        perp = ((run/rise) * int(-1))
+        #print "OTHER PERPINDICK: ", perp
+
+    #if (perp):
+        #print " WE HAVE A PERP"
     #roi = img[leftCenter[0]:leftCenter[, x1:x2]
     #    cv2.imwrite('1.png', roi)
                 
