@@ -304,11 +304,11 @@ def cropLines(pairs , img):
             if (state.label  == right):
                 rightCenter = (state.coord_x , state.coord_y)
                 print "rightCenter: ", rightCenter
-        createLineCropping(leftCenter, rightCenter, img)
+#        createLineCropping(leftCenter, rightCenter, img)
                 
-def createLineCropping(leftCenter, rightCenter, img):
-    roi = img[leftCenter[0]:leftCenter[, x1:x2]
-        cv2.imwrite('1.png', roi)
+#def createLineCropping(leftCenter, rightCenter, img):
+#    roi = img[leftCenter[0]:leftCenter[, x1:x2]
+#        cv2.imwrite('1.png', roi)
                 
                 
 def main():
