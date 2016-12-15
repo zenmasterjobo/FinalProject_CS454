@@ -209,7 +209,7 @@ def findLines(img):
             newPointx2, newPointy2 = calculateNewPoint2(newPointx2,newPointy2, x2, y2)
 
             cv2.line(img,(x1,y1),(int(newPointx2),int(newPointy2)),(0,0,255),2)
-            cv2.imwrite( 'lalalalala.png', img)
+            cv2.imwrite( 'lines.png', img)
             if(flag2 == True):
                 pair.append(state)
                 print "pair: ", pair
