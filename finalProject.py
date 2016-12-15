@@ -310,15 +310,15 @@ def cropLines(pairs , img):
                 
 def createLineCropping(leftCenter, rightCenter, img, radius):
     perp = 0
-    x1 = int(leftCenter[0])
-    x2 = int(rightCenter[0])
+    x1 = float(leftCenter[0])
+    x2 = float(rightCenter[0])
     
         
-    y1 = int(leftCenter[1])
-    y2 = int(rightCenter[1])
+    y1 = float(leftCenter[1])
+    y2 = float(rightCenter[1])
     
-    rise = (y2 - y1)
-    run = (x2 - x1)
+    rise = float(y2 - y1)
+    run = float(x2 - x1)
     print "RISE: ", rise
     print "Run: ", run 
     if(rise == 0):
@@ -330,8 +330,8 @@ def createLineCropping(leftCenter, rightCenter, img, radius):
     if(rise !=0 and run !=0):
         #print "RISE MOTHER FUCKER RISE: ", rise
         #print "RUN MOTHER FUCKER RUN: ", run
-        slope = rise/run
-        slopeInverse = ((run/rise) * int(-1))
+        slope = float(rise/run)
+        slopeInverse = (float(run/rise) * float(-1))
         #print "OTHER PERPINDICK: ", perp
         #lengthAB = math.sqrt(((x2-x1)**2)+((y2-y1)**2))
         #x = (x1 + x2)/2
@@ -344,12 +344,24 @@ def createLineCropping(leftCenter, rightCenter, img, radius):
         #box = cv2.cv.BoxPoints(rect)
         #box = np.int0(box)
         #cv2.drawContours(img,[box],0,(0,0,255),2)
-        ax = x1
-        ay = y1
+        ax1 = x1
+        ay1 = y1
+        ax2 = x2
+        ay2 = y2
         s = radius/math.sqrt(1 + slopeInverse * slopeInverse)
-        px = ax + s
-        py = ay + slopeInverse * s
-        cv2.line(img,(ax,ay),(int(px),int(py)),(147,20,255),2)
+        px11 = ax1 + s
+        py11 = ay1 + slopeInverse * s
+        px12 = ax1 - s
+        py12 = ay1 - slopeInverse * s
+        cv2.line(img,(int(ax1),int(ay1)),(int(px11),int(py11)),(147,20,255),2)
+        cv2.line(img,(int(px12),int(py12)),(int(ax1),int(ay1)),(147,20,255),2)
+
+        px21 = ax2 + s
+        py21 = ay2 + slopeInverse * s
+        px22 = ax2 - s
+        py22 = ay2 - slopeInverse * s
+        cv2.line(img,(int(ax2),int(ay2)),(int(px21),int(py21)),(147,20,255),2)
+        cv2.line(img,(int(px22),int(py22)),(int(ax2),int(ay2)),(147,20,255),2)
         
     if (perp == 0):
         cv2.rectangle(img,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
