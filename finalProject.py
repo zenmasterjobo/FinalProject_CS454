@@ -121,6 +121,7 @@ def findTriangle(img):
     contours,h = cv2.findContours(thresh,1,2)
    
     for cnt in contours:
+        print cnt , "#-----------------------------------------------"
         approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
         if len(approx)==3:
             #print "triangle"
@@ -293,7 +294,7 @@ def extract_num(input_str):
             out_number += ele
             return int(out_number) 
 
-def cropLines(pairs , img):
+def cropLines(pairs , img, imgTaco):
     global States
     leftCenter, rightCenter = (0,0)
     for left, right in pairs:
@@ -304,12 +305,63 @@ def cropLines(pairs , img):
             if (state.label  == right):
                 rightCenter = (state.coord_x , state.coord_y)
                 print "rightCenter: ", rightCenter
-#        createLineCropping(leftCenter, rightCenter, img)
                 
-#def createLineCropping(leftCenter, rightCenter, img):
-#    roi = img[leftCenter[0]:leftCenter[, x1:x2]
-#        cv2.imwrite('1.png', roi)
+        radius = state.radius
+        createLineCropping(leftCenter, rightCenter, img,imgTaco , radius)
                 
+def createLineCropping(leftCenter, rightCenter, img,imgTaco ,radius):
+  
+    perp = 0
+    x1 = float(leftCenter[0])
+    x2 = float(rightCenter[0])
+        
+    y1 = float(leftCenter[1])
+    y2 = float(rightCenter[1])
+    
+    rise = float(y2 - y1)
+    run = float(x2 - x1)
+    print "RISE: ", rise
+    print "Run: ", run 
+    if(rise == 0):
+        y1 -= radius
+        y2 += radius
+        cv2.rectangle(imgTaco,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),2)
+                
+    if(run == 0):
+        x1 -= radius
+        x2 += radius
+        cv2.rectangle(imgTaco,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),2)
+                
+    if(rise !=0 and run !=0):
+        slope = float(rise/run)
+        slopeInverse = (float(run/rise) * float(-1))
+        
+        ax1 = x1
+        ay1 = y1
+        ax2 = x2
+        ay2 = y2
+        s = radius/math.sqrt(1 + slopeInverse * slopeInverse)
+        px11 = ax1 + s
+        py11 = ay1 + slopeInverse * s
+        px12 = ax1 - s
+        py12 = ay1 - slopeInverse * s
+        cv2.line(img,(int(ax1),int(ay1)),(int(px11),int(py11)),(147,20,255),2)
+        cv2.line(img,(int(px12),int(py12)),(int(ax1),int(ay1)),(147,20,255),2)
+
+        px21 = ax2 + s
+        py21 = ay2 + slopeInverse * s
+        px22 = ax2 - s
+        py22 = ay2 - slopeInverse * s
+        cv2.line(img,(int(ax2),int(ay2)),(int(px21),int(py21)),(147,20,255),2)
+        cv2.line(img,(int(px22),int(py22)),(int(ax2),int(ay2)),(147,20,255),2)
+
+        contours = [np.array([[px11,py11],[px12,py12],[px22,py22],[px21,py21]], dtype=np.int32)]
+
+        
+        for cnt in contours:
+            cv2.drawContours(imgTaco,[cnt],0,(0,0,255),2)
+                        
+                        
                 
 def main():
     global height, width, StatePairs
@@ -320,11 +372,13 @@ def main():
     #findStateLabels(img)
     findStart(img)
     findLines(img)
-    cropLines(StatePairs , img)
+    imgTaco = cv2.imread(filename)
+    cropLines(StatePairs , img, imgTaco)
     for i in States:
         print i.label, i.coord_x, i.coord_y, i.initial, i.final, i.radius
         print "hello"
     cv2.imwrite('output.png',img)
+    cv2.imwrite("boudingRectanglesForTransitionOCR.png",imgTaco)
     cv2.destroyAllWindows()
     for i in range (len(StatePairs)):
         print StatePairs[i]
