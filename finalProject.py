@@ -331,19 +331,25 @@ def createLineCropping(leftCenter, rightCenter, img, radius):
         #print "RISE MOTHER FUCKER RISE: ", rise
         #print "RUN MOTHER FUCKER RUN: ", run
         slope = rise/run
-        #perp = ((run/rise) * int(-1))
+        slopeInverse = ((run/rise) * int(-1))
         #print "OTHER PERPINDICK: ", perp
-        lengthAB = math.sqrt(((x2-x1)**2)+((y2-y1)**2))
-        x = (x1 + x2)/2
-        y = (y1 + y2)/2
-        angle = math.degrees(math.atan(slope))
+        #lengthAB = math.sqrt(((x2-x1)**2)+((y2-y1)**2))
+        #x = (x1 + x2)/2
+        #y = (y1 + y2)/2
+        #angle = math.degrees(math.atan(slope))
         #cv2.RotatedRect((x,y),(radius,lengthAB),angle)
         #cord = [[x1,y1],[x2,y2]]
-        cord = np.array([[x1,y1],[x2,y2]])
-        rect = cv2.minAreaRect(cord)
-        box = cv2.cv.BoxPoints(rect)
-        box = np.int0(box)
-        cv2.drawContours(img,[box],0,(0,0,255),2)
+        #cord = [[x1,y1],[x2,y2]]
+        #rect = cv2.minAreaRect(cord)
+        #box = cv2.cv.BoxPoints(rect)
+        #box = np.int0(box)
+        #cv2.drawContours(img,[box],0,(0,0,255),2)
+        ax = x1
+        ay = y1
+        s = radius/math.sqrt(1 + slopeInverse * slopeInverse)
+        px = ax + s
+        py = ay + slopeInverse * s
+        cv2.line(img,(ax,ay),(int(px),int(py)),(147,20,255),2)
         
     if (perp == 0):
         cv2.rectangle(img,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
