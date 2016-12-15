@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from collections import defaultdict
 import cv2
 import cv2.cv as cv
 import numpy as np
@@ -179,18 +180,18 @@ def findLines(img):
         newPointy2 = (y2+(y2-y1)/(lengthAB*.2))
 
         
-        print "checking: ",x1, y1, x2 , y2
+        #print "checking: ",x1, y1, x2 , y2
         #print "newPointx1: ", newPointx1
         #print "newPointy1: ", newPointy1
 
-        print "newPointx2: ", newPointx2
-        print "newPointy2: ", newPointy2
+        #print "newPointx2: ", newPointx2
+        #print "newPointy2: ", newPointy2
 
         flag1 = False
         flag2 = False
         while(flag1 == False):
-            print "newPointx1: ", newPointx1
-            print "newPointy1: ", newPointy1
+            #print "newPointx1: ", newPointx1
+            #print "newPointy1: ", newPointy1
             state, flag1 = inState(newPointx1, newPointy1)
             newPointx1, newPointy1 = calculateNewPoint1(newPointx1,newPointy1, x1, y1)
             cv2.line(img,(int(newPointx1),int(newPointy1)),(x2,y2),(255,0,0),2)
@@ -226,8 +227,8 @@ def inState(x,y):
     global States
     if(isInImage(width,height,x,y)):
         for state123 in States:
-            print "state coordx: " , state123.coord_x
-            print "state coordy: " , state123.coord_y
+            #print "state coordx: " , state123.coord_x
+            #print "state coordy: " , state123.coord_y
             
             deltax = state123.coord_x - x
             deltax = pow(deltax, 2)
@@ -239,7 +240,7 @@ def inState(x,y):
 
             radius = state123.radius
             sqrtdxdy = math.sqrt(deltax + deltay)
-            print("sqrt: ", sqrtdxdy, "raidus: " , radius)
+            #print("sqrt: ", sqrtdxdy, "raidus: " , radius)
         
             if(sqrtdxdy <= radius):
                 #if state123.label == None:
@@ -309,7 +310,24 @@ def cropLines(pairs , img):
 #def createLineCropping(leftCenter, rightCenter, img):
 #    roi = img[leftCenter[0]:leftCenter[, x1:x2]
 #        cv2.imwrite('1.png', roi)
+def makeDict():
+    global States, StatePairs
+    d = dict()
+    dup = dict()
+    for state in States:
+        for pairs in StatePairs:
+            if(pairs[0] is not ''):
+                if(pairs[1] is not '' ):
+                    if(pairs[0] == state.label):
+                        print "SEND NUDEzz: ", pairs[0],'',state.label
+                        print "the right side: ", pairs[1]
+                        d[pairs[0]].append([pairs[1]])
                 
+                #dup.append(pairs[0]) 
+            #if(pairs[1])
+                #d[state.label] = [pairs[0]]
+               
+    return d
                 
 def main():
     global height, width, StatePairs
@@ -324,10 +342,12 @@ def main():
     for i in States:
         print i.label, i.coord_x, i.coord_y, i.initial, i.final, i.radius
         print "hello"
+    for i in range(len(StatePairs)):
+        print StatePairs[i]
     cv2.imwrite('output.png',img)
     cv2.destroyAllWindows()
-    for i in range (len(StatePairs)):
-        print StatePairs[i]
-
+    d = makeDict()
+    print d
+   
 if __name__ == "__main__":
 	main()
