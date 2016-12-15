@@ -304,11 +304,11 @@ def cropLines(pairs , img):
             if (state.label  == right):
                 rightCenter = (state.coord_x , state.coord_y)
                 print "rightCenter: ", rightCenter
-
-        
-        createLineCropping(leftCenter, rightCenter, img)
                 
-def createLineCropping(leftCenter, rightCenter, img):
+        radius = state.radius
+        createLineCropping(leftCenter, rightCenter, img, radius)
+                
+def createLineCropping(leftCenter, rightCenter, img, radius):
     perp = 0
     x1 = int(leftCenter[0])
     x2 = int(rightCenter[0])
@@ -322,22 +322,22 @@ def createLineCropping(leftCenter, rightCenter, img):
     print "RISE: ", rise
     print "Run: ", run 
     if(rise == 0):
-        y1 -= 10
-        y2 += 10
+        y1 -= radius
+        y2 += radius
     if(run == 0):
-        x1 -= 10
-        x2 +=10
-    else:
+        x1 -= radius
+        x2 += radius
+    if(rise !=0 and run !=0):
         print " RISE MOTHER FUCKER RISE: ", rise
         print " RUN MOTHER FUCKER RUN: ", run
         slope = rise/run
         perp = ((run/rise) * int(-1))
         #print "OTHER PERPINDICK: ", perp
 
-    #if (perp):
-        #print " WE HAVE A PERP"
-    #roi = img[leftCenter[0]:leftCenter[, x1:x2]
-    #    cv2.imwrite('1.png', roi)
+    if not(perp):
+        cv2.rectangle(img,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
+        #roi = img[y1:y2, x1:x2]
+        #cv2.imwrite(, roi)
                 
                 
 def main():
