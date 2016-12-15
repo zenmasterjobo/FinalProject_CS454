@@ -312,17 +312,14 @@ def cropLines(pairs , img):
 #        cv2.imwrite('1.png', roi)
 def makeDict():
     global States, StatePairs
-    d = dict()
-    dup = dict()
+    d = defaultdict(list)
+    dup = defaultdict(list)
     for state in States:
         for pairs in StatePairs:
             if(pairs[0] is not ''):
                 if(pairs[1] is not '' ):
                     if(pairs[0] == state.label):
-                        print "SEND NUDEzz: ", pairs[0],'',state.label
-                        print "the right side: ", pairs[1]
                         d[pairs[0]].append([pairs[1]])
-                
                 #dup.append(pairs[0]) 
             #if(pairs[1])
                 #d[state.label] = [pairs[0]]
