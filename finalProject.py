@@ -328,13 +328,24 @@ def createLineCropping(leftCenter, rightCenter, img, radius):
         x1 -= radius
         x2 += radius
     if(rise !=0 and run !=0):
-        print " RISE MOTHER FUCKER RISE: ", rise
-        print " RUN MOTHER FUCKER RUN: ", run
+        #print "RISE MOTHER FUCKER RISE: ", rise
+        #print "RUN MOTHER FUCKER RUN: ", run
         slope = rise/run
-        perp = ((run/rise) * int(-1))
+        #perp = ((run/rise) * int(-1))
         #print "OTHER PERPINDICK: ", perp
-
-    if not(perp):
+        lengthAB = math.sqrt(((x2-x1)**2)+((y2-y1)**2))
+        x = (x1 + x2)/2
+        y = (y1 + y2)/2
+        angle = math.degrees(math.atan(slope))
+        #cv2.RotatedRect((x,y),(radius,lengthAB),angle)
+        #cord = [[x1,y1],[x2,y2]]
+        cord = np.array([[x1,y1],[x2,y2]])
+        rect = cv2.minAreaRect(cord)
+        box = cv2.cv.BoxPoints(rect)
+        box = np.int0(box)
+        cv2.drawContours(img,[box],0,(0,0,255),2)
+        
+    if (perp == 0):
         cv2.rectangle(img,(int(x1),int(y1)),(int(x2),int(y2)),(0,0,255),1)
         #roi = img[y1:y2, x1:x2]
         #cv2.imwrite(, roi)
